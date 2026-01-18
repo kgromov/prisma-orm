@@ -56,8 +56,15 @@ Available commands:
                debug   Displays Prisma debug info
                  mcp   Starts an MCP server to use with AI development tools
 
+### Initialize Prisma ORM
+```
+npx prisma init --datasource-provider ${datasource} --output ../generated/prisma
+```
+By `${datasource}` can be any of supported datasource mentioned above (e.g. `postgresql`)
 
-E.g. in order to migrate defined schema run the following command:
+### Migrate schema and generate client code
+
+In order to migrate defined schema run the following command:
 ```
 npx prisma migrate dev --name init
 ```
