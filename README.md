@@ -8,6 +8,12 @@ Prisma Data Platform - is Claude based (setup db on claude servers - so paid).
 ## Prerequisites:
 * Node v20.19+
 * Typescript (preferably at least)
+* Supported DBs:
+  * Postgres
+  * MySQL
+  * SQLite
+  * SQL Server
+  * CockroachDB
 
 ## Installation
 ```
@@ -74,10 +80,14 @@ Read query is similar to mongo:
 ```
 
 ## Visualization
-Prisma comes with simple db client - Prisma Studio that allows to view data, explore table schema and relations graph.
+Prisma comes with simple db client - Prisma Studio that allows to view data, explore table schema and relations graph.  
+**NOTE:** Prisma Studio currently supports PostgreSQL, MySQL, and SQLite  
 Run command:
 ```
 npx prisma studio --config ./prisma.config.ts
 ```
 
-It will open tab on port `51212`
+It will open new tab on port `51212`
+<img width="3055" height="950" alt="prisma_tables" src="https://github.com/user-attachments/assets/bf691109-11a0-4bc2-9dcc-bf6b94ca265c" />
+<img width="3590" height="1652" alt="prisma_graph" src="https://github.com/user-attachments/assets/2c1da0e3-ee12-4c8a-befc-10d4c28a8f5d" />
+
