@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client"
   output   = "../generated/prisma"
@@ -13,18 +7,117 @@ datasource db {
   provider = "mysql"
 }
 
-model User {
-  id    Int     @id @default(autoincrement())
-  email String  @unique
-  name  String?
-  posts Post[]
+model BATCH_JOB_EXECUTION {
+  JOB_EXECUTION_ID            BigInt                       @id
+  VERSION                     BigInt?
+  JOB_INSTANCE_ID             BigInt
+  CREATE_TIME                 DateTime                     @db.DateTime(6)
+  START_TIME                  DateTime?                    @db.DateTime(6)
+  END_TIME                    DateTime?                    @db.DateTime(6)
+  STATUS                      String?                      @db.VarChar(10)
+  EXIT_CODE                   String?                      @db.VarChar(2500)
+  EXIT_MESSAGE                String?                      @db.VarChar(2500)
+  LAST_UPDATED                DateTime?                    @db.DateTime(6)
+  BATCH_JOB_INSTANCE          BATCH_JOB_INSTANCE           @relation(fields: [JOB_INSTANCE_ID], references: [JOB_INSTANCE_ID], onDelete: NoAction, onUpdate: NoAction, map: "JOB_INST_EXEC_FK")
+  BATCH_JOB_EXECUTION_CONTEXT BATCH_JOB_EXECUTION_CONTEXT?
+  BATCH_JOB_EXECUTION_PARAMS  BATCH_JOB_EXECUTION_PARAMS[] @ignore
+  BATCH_STEP_EXECUTION        BATCH_STEP_EXECUTION[]
+
+  @@index([JOB_INSTANCE_ID], map: "JOB_INST_EXEC_FK")
 }
 
-model Post {
-  id        Int     @id @default(autoincrement())
-  title     String
-  content   String? @db.Text
-  published Boolean @default(false)
-  author    User    @relation(fields: [authorId], references: [id])
-  authorId  Int
+model BATCH_JOB_EXECUTION_CONTEXT {
+  JOB_EXECUTION_ID    BigInt              @id
+  SHORT_CONTEXT       String              @db.VarChar(2500)
+  SERIALIZED_CONTEXT  String?             @db.Text
+  BATCH_JOB_EXECUTION BATCH_JOB_EXECUTION @relation(fields: [JOB_EXECUTION_ID], references: [JOB_EXECUTION_ID], onDelete: NoAction, onUpdate: NoAction, map: "JOB_EXEC_CTX_FK")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model BATCH_JOB_EXECUTION_PARAMS {
+  JOB_EXECUTION_ID    BigInt
+  PARAMETER_NAME      String              @db.VarChar(100)
+  PARAMETER_TYPE      String              @db.VarChar(100)
+  PARAMETER_VALUE     String?             @db.VarChar(2500)
+  IDENTIFYING         String              @db.Char(1)
+  BATCH_JOB_EXECUTION BATCH_JOB_EXECUTION @relation(fields: [JOB_EXECUTION_ID], references: [JOB_EXECUTION_ID], onDelete: NoAction, onUpdate: NoAction, map: "JOB_EXEC_PARAMS_FK")
+
+  @@index([JOB_EXECUTION_ID], map: "JOB_EXEC_PARAMS_FK")
+  @@ignore
+}
+
+model BATCH_JOB_EXECUTION_SEQ {
+  ID         BigInt
+  UNIQUE_KEY String @unique(map: "UNIQUE_KEY_UN") @db.Char(1)
+}
+
+model BATCH_JOB_INSTANCE {
+  JOB_INSTANCE_ID     BigInt                @id
+  VERSION             BigInt?
+  JOB_NAME            String                @db.VarChar(100)
+  JOB_KEY             String                @db.VarChar(32)
+  BATCH_JOB_EXECUTION BATCH_JOB_EXECUTION[]
+
+  @@unique([JOB_NAME, JOB_KEY], map: "JOB_INST_UN")
+}
+
+model BATCH_JOB_SEQ {
+  ID         BigInt
+  UNIQUE_KEY String @unique(map: "UNIQUE_KEY_UN") @db.Char(1)
+}
+
+model BATCH_STEP_EXECUTION {
+  STEP_EXECUTION_ID            BigInt                        @id
+  VERSION                      BigInt
+  STEP_NAME                    String                        @db.VarChar(100)
+  JOB_EXECUTION_ID             BigInt
+  CREATE_TIME                  DateTime                      @db.DateTime(6)
+  START_TIME                   DateTime?                     @db.DateTime(6)
+  END_TIME                     DateTime?                     @db.DateTime(6)
+  STATUS                       String?                       @db.VarChar(10)
+  COMMIT_COUNT                 BigInt?
+  READ_COUNT                   BigInt?
+  FILTER_COUNT                 BigInt?
+  WRITE_COUNT                  BigInt?
+  READ_SKIP_COUNT              BigInt?
+  WRITE_SKIP_COUNT             BigInt?
+  PROCESS_SKIP_COUNT           BigInt?
+  ROLLBACK_COUNT               BigInt?
+  EXIT_CODE                    String?                       @db.VarChar(2500)
+  EXIT_MESSAGE                 String?                       @db.VarChar(2500)
+  LAST_UPDATED                 DateTime?                     @db.DateTime(6)
+  BATCH_JOB_EXECUTION          BATCH_JOB_EXECUTION           @relation(fields: [JOB_EXECUTION_ID], references: [JOB_EXECUTION_ID], onDelete: NoAction, onUpdate: NoAction, map: "JOB_EXEC_STEP_FK")
+  BATCH_STEP_EXECUTION_CONTEXT BATCH_STEP_EXECUTION_CONTEXT?
+
+  @@index([JOB_EXECUTION_ID], map: "JOB_EXEC_STEP_FK")
+}
+
+model BATCH_STEP_EXECUTION_CONTEXT {
+  STEP_EXECUTION_ID    BigInt               @id
+  SHORT_CONTEXT        String               @db.VarChar(2500)
+  SERIALIZED_CONTEXT   String?              @db.Text
+  BATCH_STEP_EXECUTION BATCH_STEP_EXECUTION @relation(fields: [STEP_EXECUTION_ID], references: [STEP_EXECUTION_ID], onDelete: NoAction, onUpdate: NoAction, map: "STEP_EXEC_CTX_FK")
+}
+
+model BATCH_STEP_EXECUTION_SEQ {
+  ID         BigInt
+  UNIQUE_KEY String @unique(map: "UNIQUE_KEY_UN") @db.Char(1)
+}
+
+model DailyTemperature {
+  id                   BigInt    @id @default(autoincrement())
+  afternoonTemperature Float?
+  date                 DateTime? @db.Date
+  eveningTemperature   Float?
+  morningTemperature   Float?
+  nightTemperature     Float?
+}
+
+model DayTemperature {
+  id                   BigInt    @id @default(autoincrement())
+  afternoonTemperature Float?
+  date                 DateTime? @db.Date
+  eveningTemperature   Float?
+  morningTemperature   Float?
+  nightTemperature     Float?
 }
