@@ -4,7 +4,9 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "init": "npx prisma init --datasource-provider mysql --output ../generated/prisma",
+    "introspect": "npx prisma db pull",
+    "run": "npx tsx script.ts"
   },
   "keywords": [],
   "author": "",

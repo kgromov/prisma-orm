@@ -75,6 +75,34 @@ npx prisma generate
 This will create data under `./generated/prisma`: `internal`, `models` and generate .ts files like `client.ts`
 where client is defined and can be imported into business logic code.  
 
+## Add Prisma ORM to an existing project
+1. Initialize Prisma ORM
+```
+npx prisma init --datasource-provider ${datasource} --output ../generated/prisma
+```
+2. Setup config and datasource connection string
+3. Introspect database:
+```npx prisma db pull```
+4. Create baseline migration:
+   1. Create corresponding folder:
+   ```mkdir -p prisma/migrations/0_init```
+   2. Generate migration (it will create DDL schema):
+```
+npx prisma migrate diff --from-empty \
+    --to-schema prisma/schema.prisma \ 
+    --script > prisma/migrations/0_init/migration.sql
+```
+  3. Mark the migration as applied:
+```npx prisma migrate resolve --applied 0_init```
+5. Generate ORM types and metadata:
+```npx prisma generate```
+6. Instantiate client, run test code to query tables corresponding to generated models
+7. In order to evolve schema with changes - generate new migration:
+```
+npx prisma migrate dev --name ${migration_name}
+```
+
+
 ## Simple queries
 Read query is similar to mongo:  
 ```typescript
